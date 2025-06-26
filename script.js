@@ -3,66 +3,73 @@ document.addEventListener('DOMContentLoaded', () => {
     const addMessageBtn = document.getElementById('add-message-btn');
     const messageList = document.getElementById('message-list');
 
-    // Función para guardar los mensajes en localStorage
-    function saveMessages() {
-        const messages = [];
-        messageList.querySelectorAll('li').forEach(item => {
-            // Obtiene solo el texto del mensaje, excluyendo el botón de la 'X'
-            const messageText = item.textContent.replace('❌', '').trim();
-            messages.push(messageText);
-        });
-        localStorage.setItem('loveMessages', JSON.stringify(messages));
+    // ** Reemplaza esta URL con la que te dio Railway **
+    const BACKEND_URL = 'https://love-backend-production.up.railway.app'; 
+
+    // Función para cargar los mensajes desde el backend
+    async function loadMessages() {
+        try {
+            const response = await fetch(`${BACKEND_URL}/messages`);
+            const messages = await response.json();
+
+            // Limpia la lista actual antes de cargar los mensajes
+            messageList.innerHTML = ''; 
+
+            // Crea los elementos de la lista a partir de los mensajes del backend
+            messages.forEach(msg => createMessageElement(msg));
+        } catch (error) {
+            console.error('Error al cargar los mensajes:', error);
+        }
     }
 
     // Función para crear un nuevo elemento de mensaje (<li>)
-    function createMessageElement(messageText) {
+    function createMessageElement(message) {
         const listItem = document.createElement('li');
-        listItem.textContent = messageText;
+        listItem.textContent = message.text;
 
-        // Crea el botón de eliminar
         const deleteBtn = document.createElement('button');
         deleteBtn.textContent = '❌';
         deleteBtn.classList.add('delete-btn');
         deleteBtn.title = 'Eliminar mensaje';
 
-        // Agrega el evento de clic al botón
-        deleteBtn.addEventListener('click', () => {
-            // Inicia la animación de desvanecimiento
-            listItem.style.opacity = 0;
-            // Elimina el elemento después de la animación (opcional, pero mejora el UX)
-            setTimeout(() => {
+        deleteBtn.addEventListener('click', async () => {
+            try {
+                await fetch(`${BACKEND_URL}/messages/${message.id}`, { method: 'DELETE' });
                 listItem.remove();
-                saveMessages(); // Guarda los cambios
-            }, 300); // Espera 300ms para la animación
+            } catch (error) {
+                console.error('Error al eliminar el mensaje:', error);
+            }
         });
 
-        // Añade el botón al elemento de la lista
         listItem.appendChild(deleteBtn);
-        // Agrega el nuevo mensaje al principio de la lista
-        messageList.prepend(listItem);
+        messageList.appendChild(listItem);
     }
 
-    // Función para cargar los mensajes desde localStorage
-    function loadMessages() {
-        const storedMessages = localStorage.getItem('loveMessages');
-        if (storedMessages) {
-            const messages = JSON.parse(storedMessages);
-            messages.forEach(messageText => createMessageElement(messageText));
-        }
-    }
-
-    // Función para agregar un mensaje desde el input
-    function addMessage() {
+    // Función para agregar un mensaje al backend
+    async function addMessage() {
         const messageText = messageInput.value.trim();
         if (messageText) {
-            createMessageElement(messageText);
-            saveMessages();
-            messageInput.value = '';
-            messageInput.focus();
+            try {
+                const response = await fetch(`${BACKEND_URL}/messages`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ text: messageText })
+                });
+                const newMessage = await response.json();
+
+                // Agrega el nuevo mensaje al principio de la lista y lo crea con el ID del backend
+                createMessageElement(newMessage);
+                messageInput.value = '';
+                messageInput.focus();
+            } catch (error) {
+                console.error('Error al guardar el mensaje:', error);
+            }
         }
     }
 
-    // Event listeners principales
+    // Event listeners
     addMessageBtn.addEventListener('click', addMessage);
     messageInput.addEventListener('keydown', (event) => {
         if (event.key === 'Enter' && !event.shiftKey) {
@@ -71,10 +78,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Carga los mensajes al iniciar la página
+    // Carga los mensajes al iniciar la página desde el backend
     loadMessages();
 
-    // Lógica de los corazones
+    // Lógica de los corazones (asegúrate de que este código también esté presente)
     const heartContainer = document.querySelector('.heart-container');
     if (heartContainer) {
         function createHeart() {
