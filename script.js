@@ -6,13 +6,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Función para guardar los mensajes en localStorage
     function saveMessages() {
         const messages = [];
-        // Recorre todos los elementos <li> de la lista y guarda su texto
         messageList.querySelectorAll('li').forEach(item => {
-            // Obtenemos el texto del mensaje excluyendo el botón de eliminar
-            const messageText = item.childNodes[0].nodeValue.trim(); 
+            // Obtiene solo el texto del mensaje, excluyendo el botón de la 'X'
+            const messageText = item.textContent.replace('❌', '').trim();
             messages.push(messageText);
         });
-        // Guarda la lista de mensajes como una cadena de texto JSON
         localStorage.setItem('loveMessages', JSON.stringify(messages));
     }
 
@@ -21,55 +19,50 @@ document.addEventListener('DOMContentLoaded', () => {
         const listItem = document.createElement('li');
         listItem.textContent = messageText;
 
-        // Botón para eliminar el mensaje
+        // Crea el botón de eliminar
         const deleteBtn = document.createElement('button');
         deleteBtn.textContent = '❌';
         deleteBtn.classList.add('delete-btn');
         deleteBtn.title = 'Eliminar mensaje';
 
-        // **Evento de clic para eliminar el mensaje**
+        // Agrega el evento de clic al botón
         deleteBtn.addEventListener('click', () => {
-            // Agrega una clase para la animación de salida
-            listItem.classList.add('fade-out'); 
-            // Elimina el elemento del DOM después de que la animación termine
-            listItem.addEventListener('animationend', () => {
-                listItem.remove(); 
-                saveMessages(); // ¡Guarda los cambios!
-            });
+            // Inicia la animación de desvanecimiento
+            listItem.style.opacity = 0;
+            // Elimina el elemento después de la animación (opcional, pero mejora el UX)
+            setTimeout(() => {
+                listItem.remove();
+                saveMessages(); // Guarda los cambios
+            }, 300); // Espera 300ms para la animación
         });
 
-        // Adjunta el botón de eliminar al elemento de la lista
+        // Añade el botón al elemento de la lista
         listItem.appendChild(deleteBtn);
-        // Agrega el nuevo mensaje al inicio de la lista
-        messageList.prepend(listItem); 
+        // Agrega el nuevo mensaje al principio de la lista
+        messageList.prepend(listItem);
     }
 
-    // Función para cargar los mensajes desde localStorage al iniciar
+    // Función para cargar los mensajes desde localStorage
     function loadMessages() {
         const storedMessages = localStorage.getItem('loveMessages');
         if (storedMessages) {
             const messages = JSON.parse(storedMessages);
-            // Itera sobre el array y crea cada mensaje
-            messages.forEach(messageText => {
-                createMessageElement(messageText);
-            });
+            messages.forEach(messageText => createMessageElement(messageText));
         }
     }
 
     // Función para agregar un mensaje desde el input
     function addMessage() {
         const messageText = messageInput.value.trim();
-        if (messageText !== '') {
+        if (messageText) {
             createMessageElement(messageText);
-            saveMessages(); // Guarda el nuevo mensaje
-
-            // Limpia el input
+            saveMessages();
             messageInput.value = '';
             messageInput.focus();
         }
     }
 
-    // Asigna los eventos de clic y tecla a los botones
+    // Event listeners principales
     addMessageBtn.addEventListener('click', addMessage);
     messageInput.addEventListener('keydown', (event) => {
         if (event.key === 'Enter' && !event.shiftKey) {
@@ -78,26 +71,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Llama a la función para cargar mensajes al iniciar la página
+    // Carga los mensajes al iniciar la página
     loadMessages();
 
-    // --- Generador de corazones (revisa que este código esté completo) ---
+    // Lógica de los corazones
     const heartContainer = document.querySelector('.heart-container');
     if (heartContainer) {
         function createHeart() {
             const heart = document.createElement('div');
             heart.classList.add('heart');
             heart.textContent = '❤️'; 
-
             heart.style.left = `${Math.random() * 100}vw`; 
             heart.style.animationDuration = `${Math.random() * 5 + 5}s`; 
             heart.style.animationDelay = `-${Math.random() * 5}s`; 
-
             heartContainer.appendChild(heart);
-
-            setTimeout(() => {
-                heart.remove();
-            }, 10000); 
+            setTimeout(() => heart.remove(), 10000); 
         }
         setInterval(createHeart, 300);
     }
