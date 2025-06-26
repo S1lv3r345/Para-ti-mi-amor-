@@ -82,4 +82,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ¡Carga los mensajes al iniciar la página!
     loadMessages();
-});
+})// --- Generador de corazones para la animación ---
+const heartContainer = document.querySelector('.heart-container');
+
+function createHeart() {
+    const heart = document.createElement('div');
+    heart.classList.add('heart');
+    heart.textContent = '❤️'; // El emoji del corazón
+
+    // Posición aleatoria en el eje X
+    heart.style.left = `${Math.random() * 100}vw`; 
+    // Duración de la animación aleatoria
+    heart.style.animationDuration = `${Math.random() * 5 + 5}s`; 
+    // Retraso de la animación para que no aparezcan todos al mismo tiempo
+    heart.style.animationDelay = `-${Math.random() * 5}s`; 
+
+    heartContainer.appendChild(heart);
+
+    // Elimina el corazón una vez que la animación termina para no sobrecargar el DOM
+    setTimeout(() => {
+        heart.remove();
+    }, 10000); // 10000 ms = 10 segundos
+}
+
+// Genera un corazón cada 300 milisegundos
+setInterval(createHeart, 300);
