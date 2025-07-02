@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const messageList = document.getElementById('message-list');
 
     // ** Reemplaza esta URL con la que te dio Railway **
-    const BACKEND_URL = 'https://love-backend-production.up.railway.app'; 
+    const BACKEND_URL = 'https://love-backend-vom7.onrender.com'; 
 
     // Función para cargar los mensajes desde el backend
     async function loadMessages() {
